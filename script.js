@@ -1,118 +1,87 @@
 const startButton = document.getElementById("start-button");
 const stopButton = document.getElementById("stop-button");
 const detectedNoteDiv = document.getElementById("detected-note");
-const soundwaveElement = document.getElementById("soundwave");
+const soundwaveBar = document.getElementById("soundwave-bar");
 
-let stream, audioContext, analyser, source, dataArray, yinDetector, requestId;
+let stream;
+let audioContext;
+let analyser;
+let bufferLength;
+let dataArray;
+let yinDetector;
+let isListening = false;
 
-// Initial text
-detectedNoteDiv.textContent = "Play a chord or note...";
-
-// Start detection button
 startButton.addEventListener("click", async () => {
-  console.log("Start button clicked"); // Debugging log
-  
-  // Disable start button and show stop button
-  startButton.disabled = true;
-  stopButton.style.display = "inline-block";
+  if (isListening) return;
 
-  // Display confirmation for clicking the Start button
-  detectedNoteDiv.textContent = "Started Listening...";
+  try {
+    // Request access to the microphone
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
 
-  // Request microphone access
-  stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(s => {
-      console.log("Microphone access granted"); // Debugging log
-      return s;
-    })
-    .catch(error => {
-      console.error('Microphone access denied:', error); // Debugging log
-      detectedNoteDiv.textContent = "Microphone access denied!";
-      return null;
-    });
+    bufferLength = analyser.fftSize;
+    dataArray = new Float32Array(bufferLength);
+    yinDetector = Pitchfinder.YIN();
 
-  if (!stream) {
-    return; // Stop if we couldn't get the stream
+    isListening = true;
+
+    // Disable start button, enable stop button
+    startButton.disabled = true;
+    stopButton.disabled = false;
+    detectedNoteDiv.textContent = "Listening...";
+
+    detectPitch();
+  } catch (error) {
+    console.error("Error accessing microphone:", error);
+    detectedNoteDiv.textContent = "Error accessing microphone!";
   }
-
-  audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioContext.createAnalyser();
-  source = audioContext.createMediaStreamSource(stream);
-  source.connect(analyser);
-
-  const bufferLength = analyser.frequencyBinCount;
-  dataArray = new Uint8Array(bufferLength);
-
-  // Initialize YIN pitch detection
-  yinDetector = new YIN(audioContext.sampleRate);
-
-  // Update text
-  detectedNoteDiv.textContent = "Listening...";
-
-  // Start detecting
-  detectNote();
 });
 
-// Stop detection button
 stopButton.addEventListener("click", () => {
-  console.log("Stop button clicked"); // Debugging log
-  
-  // Disable stop button and show start button again
-  stopButton.style.display = "none";
+  if (!isListening) return;
+
+  // Stop listening and clean up
+  isListening = false;
   startButton.disabled = false;
-
-  // Display confirmation for clicking the Stop button
+  stopButton.disabled = true;
   detectedNoteDiv.textContent = "Stopped Listening";
+  soundwaveBar.style.height = "100%"; // Reset soundwave height
 
-  // Stop the stream and analyzer
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-  }
+  // Stop the audio context and microphone stream
+  audioContext.close();
+  stream.getTracks().forEach(track => track.stop());
 
-  // Stop detection process
-  cancelAnimationFrame(requestId);
-
-  // Show the initial prompt after 7 seconds
+  // Wait for 7 seconds, then reset to initial state
   setTimeout(() => {
     detectedNoteDiv.textContent = "Play a chord or note...";
   }, 7000);
 });
 
-// Function to detect note and display the soundwave
-function detectNote() {
-  analyser.getByteFrequencyData(dataArray); // Get frequency data
-  console.log("Frequency Data:", dataArray);  // Log frequency data for debugging
+function detectPitch() {
+  if (!isListening) return;
 
-  const pitch = yinDetector.getPitch(dataArray); // Get pitch from the frequency data
-  console.log("Pitch detected:", pitch);  // Log pitch for debugging
+  analyser.getFloatTimeDomainData(dataArray);
 
+  // Get the pitch from the sound data using the YIN algorithm
+  const pitch = yinDetector.getPitch(dataArray);
   if (pitch) {
-    // Convert pitch to note
+    // Convert pitch frequency to musical note
     const note = Tonal.Note.fromFreq(pitch);
-    
-    // Example of transposition: transposing the detected note
-    const transposedNote = Tonal.Note.transpose(note, "P5");
-    console.log(`Original Note: ${note}, Transposed Note: ${transposedNote}`);
-
-    detectedNoteDiv.textContent = `Detected Note: ${note} (Transposed: ${transposedNote})`;
-
-    // Debugging: Log detected pitch and note
-    console.log('Pitch detected:', pitch);
-    console.log('Note:', note);
-    console.log('Transposed Note:', transposedNote);
-  } else {
-    detectedNoteDiv.textContent = "No note detected...";
+    detectedNoteDiv.textContent = `Detected Note: ${note}`;
   }
 
+  // Update the soundwave bar with the current data
   updateSoundwave();
-  requestId = requestAnimationFrame(detectNote);
+
+  // Keep detecting pitch
+  requestAnimationFrame(detectPitch);
 }
 
-// Function to update the soundwave visualization
 function updateSoundwave() {
-  const maxValue = Math.max(...dataArray);  // Get the max frequency value from the array
-  const soundwaveHeight = (maxValue / 255) * 100; // Scale the max value to a percentage (0-100)
-
-  // Update soundwave visual (adjusting its height based on max sound level)
-  soundwaveElement.style.height = `${soundwaveHeight}%`;  // Dynamically update the height of the soundwave bar
+  const maxValue = Math.max(...dataArray); // Get the maximum value from the audio data
+  const soundwaveHeight = Math.abs(maxValue) * 100; // Scale the value to adjust the height
+  soundwaveBar.style.height = `${soundwaveHeight}%`;
 }
