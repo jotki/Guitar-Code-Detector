@@ -10,6 +10,9 @@ let source;
 let requestId;
 let isDetecting = false; // Flag to track detection status
 
+// Ensure both buttons are always visible
+stopButton.style.display = "inline-block"; // Make sure stop button is always visible
+
 startButton.addEventListener("click", async () => {
   if (isDetecting) return; // Prevent starting detection multiple times
 
@@ -17,7 +20,7 @@ startButton.addEventListener("click", async () => {
 
   // Change button colors for animation
   startButton.classList.add("clicked");
-  stopButton.style.display = "inline-block"; // Show stop button
+  detectedNoteDiv.textContent = "Listening..."; // Update status text
 
   // Request access to microphone
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -81,10 +84,13 @@ stopButton.addEventListener("click", () => {
   // Stop detection
   cancelAnimationFrame(requestId);
   stream.getTracks().forEach(track => track.stop());
-  detectedNoteDiv.textContent = "Detection stopped.";
+  detectedNoteDiv.textContent = "Stopped Listening...";
 
-  // Hide stop button and reset start button
-  stopButton.style.display = "none";
+  // Reset text after a delay
+  setTimeout(() => {
+    detectedNoteDiv.textContent = "Play a chord or note..."; // Reset text
+  }, 10000); // Wait for 10 seconds
+
   startButton.classList.remove("clicked");
   isDetecting = false; // Update flag
 });
