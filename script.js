@@ -1,6 +1,7 @@
 const startButton = document.getElementById("start-button");
 const stopButton = document.getElementById("stop-button");
 const detectedNoteDiv = document.getElementById("detected-note");
+const soundwaveElement = document.getElementById("soundwave");
 
 let stream, audioContext, analyser, source, dataArray, yinDetector, requestId;
 
@@ -9,6 +10,8 @@ detectedNoteDiv.textContent = "Play a chord or note...";
 
 // Start detection button
 startButton.addEventListener("click", async () => {
+  console.log("Start button clicked"); // Debugging log
+  
   // Disable start button and show stop button
   startButton.disabled = true;
   stopButton.style.display = "inline-block";
@@ -19,10 +22,11 @@ startButton.addEventListener("click", async () => {
   // Request microphone access
   stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     .then(s => {
+      console.log("Microphone access granted"); // Debugging log
       return s;
     })
     .catch(error => {
-      console.error('Microphone access denied:', error);
+      console.error('Microphone access denied:', error); // Debugging log
       detectedNoteDiv.textContent = "Microphone access denied!";
       return null;
     });
@@ -51,6 +55,8 @@ startButton.addEventListener("click", async () => {
 
 // Stop detection button
 stopButton.addEventListener("click", () => {
+  console.log("Stop button clicked"); // Debugging log
+  
   // Disable stop button and show start button again
   stopButton.style.display = "none";
   startButton.disabled = false;
@@ -102,6 +108,5 @@ function updateSoundwave() {
   const soundwaveHeight = (maxValue / 255) * 100; // Scale the max value to a percentage (0-100)
 
   // Update soundwave visual (adjusting its height based on max sound level)
-  const soundwaveElement = document.getElementById("soundwave");
   soundwaveElement.style.height = `${soundwaveHeight}%`;  // Dynamically update the height of the soundwave bar
 }
