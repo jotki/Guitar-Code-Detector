@@ -13,6 +13,9 @@ startButton.addEventListener("click", async () => {
   startButton.disabled = true;
   stopButton.style.display = "inline-block";
 
+  // Display confirmation for clicking the Start button
+  detectedNoteDiv.textContent = "Started Listening...";
+
   // Request microphone access
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -39,6 +42,9 @@ stopButton.addEventListener("click", () => {
   stopButton.style.display = "none";
   startButton.disabled = false;
 
+  // Display confirmation for clicking the Stop button
+  detectedNoteDiv.textContent = "Stopped Listening";
+
   // Stop the stream and analyzer
   if (stream) {
     stream.getTracks().forEach(track => track.stop());
@@ -46,10 +52,7 @@ stopButton.addEventListener("click", () => {
 
   // Stop detection process
   cancelAnimationFrame(requestId);
-  
-  // Show stopped message
-  detectedNoteDiv.textContent = "Stopped Listening";
-  
+
   // Show the initial prompt after 7 seconds
   setTimeout(() => {
     detectedNoteDiv.textContent = "Play a chord or note...";
