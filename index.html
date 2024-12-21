@@ -34,19 +34,22 @@
       color: white;
       display: inline-block;
     }
+    /* Adjust soundwave bar position and appearance */
     #soundwave {
       width: 100%;
       background-color: black; /* Black line initially */
       height: 5px; /* Flat black line at the start */
       transition: height 0.1s ease;
-      margin-top: 50px; /* Add some spacing */
+      margin-top: 30px; /* Add some spacing */
+      position: absolute;
+      bottom: 50%; /* Place the soundwave in the middle of the screen */
     }
   </style>
 </head>
 <body>
   <h1>Guitar Chord Detector</h1>
   <button id="start-button">Start Detection</button>
-  <button id="stop-button" style="display: none;">Stop Detection</button>
+  <button id="stop-button">Stop Detection</button>
   <div id="detected-note">Play a chord or note...</div>
   <div id="soundwave"></div>
   
