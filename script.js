@@ -8,8 +8,17 @@ let audioContext;
 let analyser;
 let source;
 let requestId;
+let isDetecting = false; // Flag to track detection status
 
 startButton.addEventListener("click", async () => {
+  if (isDetecting) return; // Prevent starting detection multiple times
+
+  isDetecting = true;
+
+  // Change button colors for animation
+  startButton.classList.add("clicked");
+  stopButton.style.display = "inline-block"; // Show stop button
+
   // Request access to microphone
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -25,22 +34,18 @@ startButton.addEventListener("click", async () => {
   // Function to update the sound wave visualization
   function updateSoundwave() {
     analyser.getFloatTimeDomainData(dataArray);
-    
-    // Create a visual representation of the soundwave
+
     let totalAmplitude = 0;
     for (let i = 0; i < dataArray.length; i++) {
       totalAmplitude += Math.abs(dataArray[i]);
     }
-    
-    // Map the amplitude to a width for the bar
+
     const waveWidth = Math.min(totalAmplitude * 1000, soundwaveBar.offsetWidth);  // Scale to fit the bar width
 
-    // Create a new wave bar element
     const wave = document.createElement("div");
     wave.style.width = waveWidth + "px";
     wave.className = "wave";
-    
-    // Append it to the soundwave bar and remove old waves
+
     soundwaveBar.appendChild(wave);
     if (soundwaveBar.children.length > 1) {
       soundwaveBar.removeChild(soundwaveBar.children[0]);
@@ -51,7 +56,6 @@ startButton.addEventListener("click", async () => {
   function detectNote() {
     analyser.getFloatTimeDomainData(dataArray);
 
-    // Use YIN to detect the pitch from the time-domain data
     const pitch = yinDetector.getPitch(dataArray);
 
     if (pitch) {
@@ -61,22 +65,26 @@ startButton.addEventListener("click", async () => {
       detectedNoteDiv.textContent = "No note detected...";
     }
 
-    // Update the sound wave display and continue the detection loop
     updateSoundwave();
     requestId = requestAnimationFrame(detectNote);
   }
 
   detectNote();
-
-  // Show Stop button when detection starts
-  stopButton.style.display = "inline-block";
 });
 
 stopButton.addEventListener("click", () => {
+  if (!isDetecting) return; // Prevent stopping if detection is not running
+
+  // Change button colors for animation
+  stopButton.classList.add("clicked");
+
   // Stop detection
   cancelAnimationFrame(requestId);
   stream.getTracks().forEach(track => track.stop());
   detectedNoteDiv.textContent = "Detection stopped.";
-  stopButton.style.display = "none"; // Hide stop button
-  soundwaveBar.innerHTML = ""; // Clear the sound wave display
+
+  // Hide stop button and reset start button
+  stopButton.style.display = "none";
+  startButton.classList.remove("clicked");
+  isDetecting = false; // Update flag
 });
