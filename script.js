@@ -89,11 +89,17 @@ function detectNote() {
   if (pitch) {
     // Convert pitch to note
     const note = Tonal.Note.fromFreq(pitch);
-    detectedNoteDiv.textContent = `Detected Note: ${note}`;
+    
+    // Example of transposition: transposing the detected note
+    const transposedNote = Tonal.Note.transpose(note, "P5");
+    console.log(`Original Note: ${note}, Transposed Note: ${transposedNote}`);
+
+    detectedNoteDiv.textContent = `Detected Note: ${note} (Transposed: ${transposedNote})`;
 
     // Debugging: Log detected pitch and note
     console.log('Pitch detected:', pitch);
     console.log('Note:', note);
+    console.log('Transposed Note:', transposedNote);
   } else {
     detectedNoteDiv.textContent = "No note detected...";
   }
