@@ -6,9 +6,15 @@ const canvasContext = canvas.getContext("2d");
 
 let audioContext, analyser, source, stream, animationFrameId;
 
-stopButton.style.display = "none";  // Hide stop button initially
+stopButton.style.display = "inline-block";  // Ensure stop button is always visible
+startButton.style.display = "inline-block"; // Ensure start button is always visible
 
+// Start Detection button click
 startButton.addEventListener("click", async () => {
+  // Add clicked animation
+  startButton.classList.add("clicked");
+  setTimeout(() => startButton.classList.remove("clicked"), 600); // Remove animation after 600ms
+
   // Request access to microphone
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -21,9 +27,8 @@ startButton.addEventListener("click", async () => {
   const dataArray = new Uint8Array(bufferLength);
   const detectPitch = Pitchfinder.AMDF();
 
-  // Hide the start button and show stop button
+  // Hide the start button and keep the stop button visible
   startButton.style.display = "none";
-  stopButton.style.display = "inline-block";
 
   function detectNote() {
     analyser.getByteFrequencyData(dataArray);
@@ -59,8 +64,12 @@ startButton.addEventListener("click", async () => {
   detectNote();
 });
 
-// Stop detection
+// Stop Detection button click
 stopButton.addEventListener("click", () => {
+  // Add clicked animation
+  stopButton.classList.add("clicked");
+  setTimeout(() => stopButton.classList.remove("clicked"), 600); // Remove animation after 600ms
+
   // Stop audio and cancel the animation frame
   if (audioContext) {
     audioContext.close();
@@ -71,9 +80,9 @@ stopButton.addEventListener("click", () => {
 
   cancelAnimationFrame(animationFrameId);
 
-  // Hide the stop button and show the start button
+  // Hide the stop button and show the start button again
   startButton.style.display = "inline-block";
-  stopButton.style.display = "none";
+  stopButton.style.display = "inline-block";  // Keep stop button visible
 
   // Reset display
   detectedNoteDiv.textContent = "Detection stopped.";
