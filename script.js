@@ -1,96 +1,89 @@
 const startButton = document.getElementById("start-button");
 const stopButton = document.getElementById("stop-button");
 const detectedNoteDiv = document.getElementById("detected-note");
-const soundwaveBar = document.getElementById("soundwave-bar");
 
-let stream;
-let audioContext;
-let analyser;
-let source;
-let requestId;
-let isDetecting = false; // Flag to track detection status
+let stream, audioContext, analyser, source, dataArray, yinDetector, requestId;
 
-// Ensure both buttons are always visible
-stopButton.style.display = "inline-block"; // Make sure stop button is always visible
+// Initial text
+detectedNoteDiv.textContent = "Play a chord or note...";
 
+// Start detection button
 startButton.addEventListener("click", async () => {
-  if (isDetecting) return; // Prevent starting detection multiple times
+  // Disable start button and show stop button
+  startButton.disabled = true;
+  stopButton.style.display = "inline-block";
 
-  isDetecting = true;
-
-  // Change button colors for animation
-  startButton.classList.add("clicked");
-  detectedNoteDiv.textContent = "Listening..."; // Update status text
-
-  // Request access to microphone
+  // Request microphone access
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioContext.createAnalyser();
   source = audioContext.createMediaStreamSource(stream);
   source.connect(analyser);
 
-  // Set up YIN pitch detection
   const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Float32Array(bufferLength);
-  const yinDetector = new YIN(audioContext.sampleRate); // YIN setup
+  dataArray = new Uint8Array(bufferLength);
 
-  // Function to update the sound wave visualization
-  function updateSoundwave() {
-    analyser.getFloatTimeDomainData(dataArray);
+  // Initialize YIN pitch detection
+  yinDetector = new YIN(audioContext.sampleRate);
 
-    let totalAmplitude = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      totalAmplitude += Math.abs(dataArray[i]);
-    }
+  // Update text
+  detectedNoteDiv.textContent = "Listening...";
 
-    const waveWidth = Math.min(totalAmplitude * 1000, soundwaveBar.offsetWidth);  // Scale to fit the bar width
-
-    const wave = document.createElement("div");
-    wave.style.width = waveWidth + "px";
-    wave.className = "wave";
-
-    soundwaveBar.appendChild(wave);
-    if (soundwaveBar.children.length > 1) {
-      soundwaveBar.removeChild(soundwaveBar.children[0]);
-    }
-  }
-
-  // Function to detect the note and update the display
-  function detectNote() {
-    analyser.getFloatTimeDomainData(dataArray);
-
-    const pitch = yinDetector.getPitch(dataArray);
-
-    if (pitch) {
-      const note = Tonal.Note.fromFreq(pitch);
-      detectedNoteDiv.textContent = `Detected Note: ${note}`;
-    } else {
-      detectedNoteDiv.textContent = "No note detected...";
-    }
-
-    updateSoundwave();
-    requestId = requestAnimationFrame(detectNote);
-  }
-
+  // Start detecting
   detectNote();
 });
 
+// Stop detection button
 stopButton.addEventListener("click", () => {
-  if (!isDetecting) return; // Prevent stopping if detection is not running
+  // Disable stop button and show start button again
+  stopButton.style.display = "none";
+  startButton.disabled = false;
 
-  // Change button colors for animation
-  stopButton.classList.add("clicked");
+  // Stop the stream and analyzer
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
 
-  // Stop detection
+  // Stop detection process
   cancelAnimationFrame(requestId);
-  stream.getTracks().forEach(track => track.stop());
-  detectedNoteDiv.textContent = "Stopped Listening"; // Update text
-
-  // Reset text after a delay
+  
+  // Show stopped message
+  detectedNoteDiv.textContent = "Stopped Listening";
+  
+  // Show the initial prompt after 7 seconds
   setTimeout(() => {
-    detectedNoteDiv.textContent = "Play a chord or note..."; // Reset text
-  }, 7000); // Wait for 7 seconds
-
-  startButton.classList.remove("clicked");
-  isDetecting = false; // Update flag
+    detectedNoteDiv.textContent = "Play a chord or note...";
+  }, 7000);
 });
+
+// Function to detect note and display the soundwave
+function detectNote() {
+  analyser.getByteFrequencyData(dataArray); // Use frequency-domain data
+  const pitch = yinDetector.getPitch(dataArray); // Get pitch from the frequency data
+
+  if (pitch) {
+    // Convert pitch to note
+    const note = Tonal.Note.fromFreq(pitch);
+    detectedNoteDiv.textContent = `Detected Note: ${note}`;
+
+    // Debugging: Log detected pitch and note
+    console.log('Pitch detected:', pitch);
+    console.log('Note:', note);
+  } else {
+    detectedNoteDiv.textContent = "No note detected...";
+  }
+
+  updateSoundwave();
+  requestId = requestAnimationFrame(detectNote);
+}
+
+// Function to update the soundwave visualization
+function updateSoundwave() {
+  const maxValue = Math.max(...dataArray);
+  const soundwaveHeight = (maxValue / 255) * 100; // Scale the max value to a percentage (0-100)
+  
+  // Update soundwave visual (you can adjust the element to match your needs)
+  const soundwaveElement = document.getElementById("soundwave");
+  soundwaveElement.style.height = `${soundwaveHeight}%`;
+}
+
