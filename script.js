@@ -84,12 +84,12 @@ stopButton.addEventListener("click", () => {
   // Stop detection
   cancelAnimationFrame(requestId);
   stream.getTracks().forEach(track => track.stop());
-  detectedNoteDiv.textContent = "Stopped Listening...";
+  detectedNoteDiv.textContent = "Stopped Listening"; // Update text
 
   // Reset text after a delay
   setTimeout(() => {
     detectedNoteDiv.textContent = "Play a chord or note..."; // Reset text
-  }, 10000); // Wait for 10 seconds
+  }, 7000); // Wait for 7 seconds
 
   startButton.classList.remove("clicked");
   isDetecting = false; // Update flag
