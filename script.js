@@ -39,7 +39,8 @@ startButton.addEventListener("click", async () => {
     detectPitch();
   } catch (error) {
     console.error("Error accessing microphone:", error);
-    detectedNoteDiv.textContent = `Error: ${error.message}`;
+    detectedNoteDiv.textContent = `Error: ${error.name} - ${error.message}`;
+    alert(`Error accessing microphone: ${error.message}`);
   }
 });
 
