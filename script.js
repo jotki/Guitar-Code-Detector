@@ -11,11 +11,12 @@ startButton.addEventListener("click", async () => {
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioContext.createAnalyser();
+  analyser.fftSize = 2048;  // Increase fftSize for better frequency resolution
   source = audioContext.createMediaStreamSource(stream);
   source.connect(analyser);
 
-  const bufferLength = analyser.fftSize;
-  const dataArray = new Float32Array(bufferLength);
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
   const detectPitch = Pitchfinder.AMDF();
 
   // Hide the start button and show stop button
@@ -23,26 +24,28 @@ startButton.addEventListener("click", async () => {
   stopButton.style.display = "inline-block";
 
   function detectNote() {
-    analyser.getFloatTimeDomainData(dataArray);
-    const pitch = detectPitch(dataArray, audioContext.sampleRate);
+    analyser.getByteFrequencyData(dataArray);
 
+    // Get the pitch from the frequency data
+    const pitch = detectPitch(dataArray, audioContext.sampleRate);
     if (pitch) {
       const note = Tonal.Note.fromFreq(pitch);
       detectedNoteDiv.textContent = `Detected Note: ${note}`;
+      console.log(`Detected pitch: ${pitch} Hz, Note: ${note}`); // Debug log
     } else {
       detectedNoteDiv.textContent = "No note detected...";
     }
 
     // Update soundwave bar
-    analyser.getByteFrequencyData(dataArray);
     canvasContext.clearRect(0, 0, canvas.width, canvas.height); // Clear previous frame
 
-    // Draw new soundwave data
     const barWidth = canvas.width / bufferLength;
     let x = 0;
+
+    // Draw the frequency data as a soundwave bar
     for (let i = 0; i < bufferLength; i++) {
       const barHeight = dataArray[i];
-      canvasContext.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+      canvasContext.fillStyle = `rgb(${barHeight + 100}, 50, 50)`; // Color gradient
       canvasContext.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
       x += barWidth;
     }
