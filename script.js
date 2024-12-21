@@ -79,11 +79,10 @@ function detectNote() {
 
 // Function to update the soundwave visualization
 function updateSoundwave() {
-  const maxValue = Math.max(...dataArray);
+  const maxValue = Math.max(...dataArray);  // Get the max frequency value from the array
   const soundwaveHeight = (maxValue / 255) * 100; // Scale the max value to a percentage (0-100)
-  
-  // Update soundwave visual (you can adjust the element to match your needs)
-  const soundwaveElement = document.getElementById("soundwave");
-  soundwaveElement.style.height = `${soundwaveHeight}%`;
-}
 
+  // Update soundwave visual (adjusting its height based on max sound level)
+  const soundwaveElement = document.getElementById("soundwave");
+  soundwaveElement.style.height = `${soundwaveHeight}%`;  // Dynamically update the height of the soundwave bar
+}
