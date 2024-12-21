@@ -6,6 +6,8 @@ const canvasContext = canvas.getContext("2d");
 
 let audioContext, analyser, source, stream, animationFrameId;
 
+stopButton.style.display = "none";  // Hide stop button initially
+
 startButton.addEventListener("click", async () => {
   // Request access to microphone
   stream = await navigator.mediaDevices.getUserMedia({ audio: true });
