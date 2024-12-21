@@ -1,21 +1,3 @@
-// Import Tonal Library from CDN
-import * as Tonal from 'https://cdn.jsdelivr.net/npm/tonal@2.0.1/dist/tonal.js';
-
-// Fake YIN pitch detection setup (if you don't have one already)
-// This is a basic version of a YIN detector. You can replace it with a more advanced one.
-class YIN {
-  constructor(sampleRate) {
-    this.sampleRate = sampleRate;
-  }
-
-  // Basic pitch detection (you may need a more advanced version)
-  getPitch(dataArray) {
-    // You should replace this with an actual YIN pitch detection algorithm
-    // For now, it just returns a random pitch
-    return Math.random() * 1000 + 100; // Random pitch between 100 and 1100 Hz
-  }
-}
-
 const startButton = document.getElementById("start-button");
 const stopButton = document.getElementById("stop-button");
 const detectedNoteDiv = document.getElementById("detected-note");
@@ -88,9 +70,7 @@ stopButton.addEventListener("click", () => {
   }
 
   // Stop detection process
-  if (requestId) {
-    cancelAnimationFrame(requestId);
-  }
+  cancelAnimationFrame(requestId);
 
   // Show the initial prompt after 7 seconds
   setTimeout(() => {
