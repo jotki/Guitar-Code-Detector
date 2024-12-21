@@ -28,12 +28,12 @@
     #stop-button {
       background-color: #dc3545;
       color: white;
-      display: none;
+      display: inline-block;
     }
     #soundwave {
       width: 100%;
-      background-color: #007BFF;
-      height: 0;
+      background-color: black; /* Black line initially */
+      height: 5px; /* Flat black line at the start */
       transition: height 0.1s ease;
     }
   </style>
@@ -41,7 +41,7 @@
 <body>
   <h1>Guitar Chord Detector</h1>
   <button id="start-button">Start Detection</button>
-  <button id="stop-button">Stop Detection</button>
+  <button id="stop-button" style="display: none;">Stop Detection</button>
   <div id="detected-note">Play a chord or note...</div>
   <div id="soundwave"></div>
   
