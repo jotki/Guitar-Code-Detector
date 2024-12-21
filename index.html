@@ -43,8 +43,10 @@
 
   <div id="soundwave-bar"></div>
 
+  <!-- Load Tonal and Pitchfinder libraries -->
   <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pitchfinder@3.1.0/dist/index.min.js"></script> <!-- Pitchfinder Script -->
+  <script src="https://cdn.jsdelivr.net/npm/pitchfinder@3.1.0/dist/pitchfinder.min.js"></script>
+
   <script>
     const startButton = document.getElementById("start-button");
     const stopButton = document.getElementById("stop-button");
@@ -75,7 +77,7 @@
 
         bufferLength = analyser.fftSize;
         dataArray = new Float32Array(bufferLength);
-        yinDetector = Pitchfinder.YIN();
+        yinDetector = Pitchfinder.YIN();  // Initialize YIN detector from Pitchfinder
 
         isListening = true;
 
