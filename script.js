@@ -17,7 +17,20 @@ startButton.addEventListener("click", async () => {
   detectedNoteDiv.textContent = "Started Listening...";
 
   // Request microphone access
-  stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(s => {
+      return s;
+    })
+    .catch(error => {
+      console.error('Microphone access denied:', error);
+      detectedNoteDiv.textContent = "Microphone access denied!";
+      return null;
+    });
+
+  if (!stream) {
+    return; // Stop if we couldn't get the stream
+  }
+
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioContext.createAnalyser();
   source = audioContext.createMediaStreamSource(stream);
@@ -61,8 +74,11 @@ stopButton.addEventListener("click", () => {
 
 // Function to detect note and display the soundwave
 function detectNote() {
-  analyser.getByteFrequencyData(dataArray); // Use frequency-domain data
+  analyser.getByteFrequencyData(dataArray); // Get frequency data
+  console.log("Frequency Data:", dataArray);  // Log frequency data for debugging
+
   const pitch = yinDetector.getPitch(dataArray); // Get pitch from the frequency data
+  console.log("Pitch detected:", pitch);  // Log pitch for debugging
 
   if (pitch) {
     // Convert pitch to note
