@@ -12,10 +12,14 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 20px;
     }
     #detected-note {
-      font-size: 2rem;
+      font-size: 1.5rem;
       margin-top: 20px;
       color: #007BFF;
     }
@@ -40,17 +44,28 @@
       background-color: black; /* Black line initially */
       height: 5px; /* Flat black line at the start */
       transition: height 0.1s ease;
-      margin-top: 30px; /* Add some spacing */
+      margin-top: 50px; /* Add some spacing from the buttons */
       position: absolute;
       bottom: 50%; /* Place the soundwave in the middle of the screen */
+    }
+    /* Create a row layout for buttons */
+    #button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <h1>Guitar Chord Detector</h1>
-  <button id="start-button">Start Detection</button>
-  <button id="stop-button">Stop Detection</button>
   <div id="detected-note">Play a chord or note...</div>
+  
+  <!-- Button container for both Start and Stop buttons -->
+  <div id="button-container">
+    <button id="start-button">Start Detection</button>
+    <button id="stop-button">Stop Detection</button>
+  </div>
+  
   <div id="soundwave"></div>
   
   <script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@3.2.6/dist/Tonal.min.js"></script>
