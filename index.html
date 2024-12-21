@@ -34,10 +34,15 @@
       margin-top: 50px;
     }
   </style>
+  <!-- Tonal.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
   <script>
     // Test Tonal.js by logging a minor key for Ab
     console.log(Tonal.Key.minorKey("Ab"));
+    
+    // Testing transposition functionality
+    const transposedNote = Tonal.Note.transpose("A4", "P5");
+    console.log(`Transposed Note: ${transposedNote}`);
   </script>
 </head>
 <body>
