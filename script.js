@@ -16,7 +16,10 @@ startButton.addEventListener("click", async () => {
 
   try {
     // Request access to the microphone
+    console.log("Requesting microphone access...");
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Success! Set up the audio context and analyser
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
     const source = audioContext.createMediaStreamSource(stream);
@@ -36,7 +39,7 @@ startButton.addEventListener("click", async () => {
     detectPitch();
   } catch (error) {
     console.error("Error accessing microphone:", error);
-    detectedNoteDiv.textContent = "Error accessing microphone!";
+    detectedNoteDiv.textContent = `Error: ${error.message}`;
   }
 });
 
