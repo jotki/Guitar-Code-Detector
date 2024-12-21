@@ -20,9 +20,19 @@
       font-size: 1rem;
       cursor: pointer;
       margin: 10px;
+      transition: all 0.3s ease;
+    }
+    #start-button {
+      background-color: #28a745;
+      color: white;
     }
     #stop-button {
-      display: none;
+      background-color: #dc3545;
+      color: white;
+      display: none; /* Hide by default */
+    }
+    .clicked {
+      transform: scale(1.1);
     }
     #soundwave-bar {
       width: 100%;
@@ -42,14 +52,15 @@
 </head>
 <body>
   <h1>Guitar Chord Detector</h1>
-  <button id="start-button">Start Detection</button>
-  <button id="stop-button">Stop Detection</button>
+  <div>
+    <button id="start-button">Start Detection</button>
+    <button id="stop-button">Stop Detection</button>
+  </div>
   <div id="detected-note">Play a note or chord...</div>
-  
   <div id="soundwave-bar"></div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@3.2.6/dist/Tonal.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/yen-pitch-detection@0.1.0/yen.min.js"></script> <!-- YIN library -->
+  <script src="https://cdn.jsdelivr.net/npm/yen-pitch-detection@0.1.0/yen.min.js"></script>
   <script src="script.js" defer></script>
 </body>
 </html>
